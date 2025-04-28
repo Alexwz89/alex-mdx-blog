@@ -1,7 +1,24 @@
+import { getMdxBySlug } from "@/app/lib/mdx";
+import BlogLayout from "./blog-layout";
+import { MDXRemote } from "next-mdx-remote/rsc";
+import { mdxComponents } from "./mdx-components";
+import rehypePrismPlus from "rehype-prism-plus";
+
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const { default: Post } = await import(`@/_blogs/posts/${slug}.mdx`);
-  return <Post />;
-}
+  const { frontmatter, content } = await getMdxBySlug(slug);
 
-export const dynamicParams = false;
+  return (
+    <BlogLayout frontmatter={frontmatter}>
+      <MDXRemote
+        source={content}
+        components={mdxComponents}
+        options={{
+          mdxOptions: {
+            rehypePlugins: [[rehypePrismPlus, { ignoreMissing: true }]],
+          },
+        }}
+      />
+    </BlogLayout>
+  );
+}

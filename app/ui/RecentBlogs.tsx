@@ -1,5 +1,5 @@
 import React from "react";
-import { BlogPostType, getBlogPosts } from "../lib/blogposts";
+import { BlogPostType, getBlogPosts } from "../lib/mdx";
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
@@ -13,7 +13,7 @@ function BlogCard({
   size?: "default" | "large";
   layout?: "row" | "col";
 }) {
-  const img_src = blog.image ? blog.image : "/images/webdevelopment.jpg";
+  const img_src = blog.frontmatter.image ? blog.frontmatter.image : "/images/webdevelopment.jpg";
   return (
     <div
       className={clsx("border-2 rounded-lg", {
@@ -30,19 +30,19 @@ function BlogCard({
           "md:aspect-3/1": layout === "row" && size === "large",
         })}
       >
-        <Image src={img_src} alt={blog.title} fill style={{ objectFit: "cover" }} className="rounded-sm" />
+        <Image src={img_src} alt={blog.frontmatter.title} fill style={{ objectFit: "cover" }} className="rounded-sm" />
       </div>
       <div className="flex flex-col justify-between">
         <div className="p-2">
-          <p className="text-sm font-bold text-[#6941C6]">{blog.publishedAt}</p>
+          <p className="text-sm font-bold text-[#6941C6]">{blog.frontmatter.publishedAt}</p>
           <h3
             className={clsx("font-bold leading-tight py-3 text-lg", {
               "md:text-2xl": size === "large",
             })}
           >
-            {blog.title}
+            {blog.frontmatter.title}
           </h3>
-          <p className="text-base text-muted-foreground line-clamp-3">{blog.summary}</p>
+          <p className="text-base text-muted-foreground line-clamp-3">{blog.frontmatter.summary}</p>
         </div>
         <Link
           href={`/blogs/${blog.slug}`}
@@ -57,8 +57,8 @@ function BlogCard({
   );
 }
 
-const Recent4Blogs = () => {
-  const recent4Blogs = getBlogPosts().slice(0, 4);
+const Recent4Blogs = async () => {
+  const recent4Blogs = (await getBlogPosts()).slice(0, 4);
   return (
     <section className="mt-10">
       <h2 className="text-2xl font-bold mb-4">Recent Blogs</h2>
@@ -72,11 +72,12 @@ const Recent4Blogs = () => {
   );
 };
 
-export const RestofBlogs = () => {
-  if (getBlogPosts().length <= 4) {
+export const RestofBlogs = async () => {
+  const allBlogs = await getBlogPosts();
+  if (allBlogs.length <= 4) {
     return null;
   }
-  const restofBlogs = getBlogPosts().slice(4);
+  const restofBlogs = allBlogs.slice(4);
   return (
     <section className="md: mt-10">
       <h2 className="text-2xl font-bold mb-4">All blog posts</h2>

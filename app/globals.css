@@ -135,3 +135,162 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Prism 样式 - 明色主题 */
+pre[class*="language-"] {
+  background-color: var(--prism-bg);
+  color: var(--prism-text);
+  padding: 1em;
+  margin: 0.5em 0;
+  overflow: auto;
+  border-radius: 0.3em;
+  border: 1px solid var(--prism-border);
+}
+
+code[class*="language-"] {
+  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+  font-size: 1em;
+  text-align: left;
+  white-space: pre;
+  word-spacing: normal;
+  word-break: normal;
+  word-wrap: normal;
+  line-height: 1.5;
+  tab-size: 4;
+  hyphens: none;
+}
+
+/* 明色主题的语法高亮 */
+:root {
+  --prism-bg: #f5f5f5;
+  --prism-text: #333;
+  --prism-border: #e0e0e0;
+  --prism-comment: #6a737d;
+  --prism-punctuation: #24292e;
+  --prism-property: #005cc5;
+  --prism-tag: #22863a;
+  --prism-boolean: #005cc5;
+  --prism-number: #005cc5;
+  --prism-constant: #005cc5;
+  --prism-symbol: #005cc5;
+  --prism-deleted: #b31d28;
+  --prism-selector: #22863a;
+  --prism-attr-name: #005cc5;
+  --prism-string: #032f62;
+  --prism-char: #032f62;
+  --prism-builtin: #22863a;
+  --prism-inserted: #22863a;
+  --prism-operator: #24292e;
+  --prism-entity: #24292e;
+  --prism-url: #032f62;
+  --prism-atrule: #005cc5;
+  --prism-attr-value: #032f62;
+  --prism-keyword: #d73a49;
+  --prism-function: #6f42c1;
+  --prism-class-name: #6f42c1;
+  --prism-regex: #032f62;
+  --prism-important: #d73a49;
+  --prism-variable: #e36209;
+}
+
+/* 暗色主题的语法高亮 */
+.dark {
+  --prism-bg: #1e1e1e;
+  --prism-text: #d4d4d4;
+  --prism-border: #333;
+  --prism-comment: #6a9955;
+  --prism-punctuation: #d4d4d4;
+  --prism-property: #b5cea8;
+  --prism-tag: #b5cea8;
+  --prism-boolean: #b5cea8;
+  --prism-number: #b5cea8;
+  --prism-constant: #b5cea8;
+  --prism-symbol: #b5cea8;
+  --prism-deleted: #b5cea8;
+  --prism-selector: #ce9178;
+  --prism-attr-name: #ce9178;
+  --prism-string: #ce9178;
+  --prism-char: #ce9178;
+  --prism-builtin: #ce9178;
+  --prism-inserted: #ce9178;
+  --prism-operator: #d4d4d4;
+  --prism-entity: #d4d4d4;
+  --prism-url: #d4d4d4;
+  --prism-atrule: #569cd6;
+  --prism-attr-value: #569cd6;
+  --prism-keyword: #569cd6;
+  --prism-function: #dcdcaa;
+  --prism-class-name: #dcdcaa;
+  --prism-regex: #d16969;
+  --prism-important: #d16969;
+  --prism-variable: #d16969;
+}
+
+/* 应用语法高亮颜色 */
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+  color: var(--prism-comment);
+}
+
+.token.punctuation {
+  color: var(--prism-punctuation);
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+  color: var(--prism-property);
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+  color: var(--prism-selector);
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+  color: var(--prism-operator);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+  color: var(--prism-keyword);
+}
+
+.token.function,
+.token.class-name {
+  color: var(--prism-function);
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+  color: var(--prism-regex);
+}
+
+.token.important,
+.token.bold {
+  font-weight: bold;
+}
+
+.token.italic {
+  font-style: italic;
+}
+
+.token.entity {
+  cursor: help;
+}
