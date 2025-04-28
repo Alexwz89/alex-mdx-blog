@@ -1,4 +1,3 @@
-import BlogList from "./ui/BlogList";
 import Recent4Blogs from "./ui/RecentBlogs";
 import { RestofBlogs } from "./ui/RecentBlogs";
 
