@@ -140,24 +140,29 @@
 pre[class*="language-"] {
   background-color: var(--prism-bg);
   color: var(--prism-text);
-  padding: 1em;
-  margin: 0.5em 0;
+  padding: 1.5em;
+  margin: 1em 0;
   overflow: auto;
-  border-radius: 0.3em;
+  border-radius: 0.5em;
   border: 1px solid var(--prism-border);
+  font-size: 0.9375em;
+  line-height: 1.6;
+  font-family: "JetBrains Mono", monospace;
 }
 
 code[class*="language-"] {
-  font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
-  font-size: 1em;
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.9375em;
   text-align: left;
   white-space: pre;
   word-spacing: normal;
   word-break: normal;
   word-wrap: normal;
-  line-height: 1.5;
+  line-height: 1.6;
   tab-size: 4;
   hyphens: none;
+  letter-spacing: 0;
+  font-feature-settings: "liga" 1, "calt" 1;
 }
 
 /* 明色主题的语法高亮 */

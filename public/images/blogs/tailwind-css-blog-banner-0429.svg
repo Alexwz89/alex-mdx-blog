@@ -1,0 +1,59 @@
+<svg viewBox="0 0 1600 900" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient -->
+  <defs>
+    <linearGradient id="bg-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F172A" />
+      <stop offset="100%" stop-color="#1E293B" />
+    </linearGradient>
+    <linearGradient id="accent-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06B6D4" />
+      <stop offset="100%" stop-color="#3B82F6" />
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="20" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over" />
+    </filter>
+  </defs>
+
+  <!-- Main background -->
+  <rect width="1600" height="900" fill="url(#bg-gradient)" />
+  
+  <!-- Subtle grid pattern -->
+  <path d="M0 0h1600v900H0z" fill="url(#bg-gradient)" />
+  <g stroke="#ffffff10" stroke-width="1">
+    <path d="M0 150h1600M0 300h1600M0 450h1600M0 600h1600M0 750h1600" />
+    <path d="M150 0v900M300 0v900M450 0v900M600 0v900M750 0v900M900 0v900M1050 0v900M1200 0v900M1350 0v900M1500 0v900" />
+  </g>
+
+  <!-- Abstract design elements -->
+  <circle cx="200" cy="750" r="350" fill="#0EA5E940" filter="blur(100px)" />
+  <circle cx="1400" cy="150" r="300" fill="#3B82F620" filter="blur(80px)" />
+  
+  <!-- Tailwind CSS logo - with separated curves and moved further left -->
+  <g transform="translate(120, 450)">
+    <!-- Bottom curve -->
+    <path d="M32.48 90.74c8.5-34 33.63-51 75.37-51 62.5 0 70.75 47 102.5 55 21.12 5.33 39.5-1 55.12-19-8.5 34-33.63 51-75.37 51-62.5 0-70.75-47-102.5-55-21.13-5.33-39.5 1-55.13 19z" fill="#06B6D4"/>
+    <!-- Top curve - moved up -->
+    <path d="M0 -10c8.5-34 33.63-51 75.37-51 62.5 0 70.75 47 102.5 55 21.12 5.33 39.5-1 55.12-19-8.5 34-33.63 51-75.37 51-62.5 0-70.75-47-102.5-55C34 -23.67 15.63 -17.33 0 1z" fill="#06B6D4"/>
+  </g>
+  
+  <!-- Title text - moved right -->
+  <g transform="translate(480, 450)">
+    <text x="0" y="0" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="72" font-weight="700" fill="white">
+      Best Practice of
+    </text>
+    <text x="0" y="90" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="72" font-weight="700" fill="white">
+      Tailwind CSS 4.x
+    </text>
+    <text x="0" y="180" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="72" font-weight="700" fill="url(#accent-gradient)">
+      Customizing Style
+    </text>
+  </g>
+
+  <!-- Version tag - with consistent font -->
+  <g transform="translate(1200, 450)">
+    <rect x="0" y="0" width="220" height="80" rx="40" fill="#1E293B" stroke="#4B5563" stroke-width="2" />
+    <text x="110" y="50" font-family="Inter, -apple-system, system-ui, sans-serif" font-size="36" font-weight="600" fill="white" text-anchor="middle" dominant-baseline="middle">v4.0.0</text>
+    <path d="M200 15l15 15-15 15" stroke="#06B6D4" stroke-width="3" fill="none" />
+  </g>
+</svg>
