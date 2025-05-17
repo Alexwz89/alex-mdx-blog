@@ -3,6 +3,8 @@ import { BlogPostType, getBlogPosts } from "../lib/mdx";
 import Image from "next/image";
 import Link from "next/link";
 import clsx from "clsx";
+import grainImage from "@/public/images/grain.jpg";
+
 
 function BlogCard({
   blog,
@@ -16,12 +18,21 @@ function BlogCard({
   const img_src = blog.frontmatter.image ? blog.frontmatter.image : "/images/webdevelopment.jpg";
   return (
     <div
-      className={clsx("border-2 rounded-lg", {
-        "md:grid md:grid-cols-2 md:gap-6": layout === "row",
-        "md:grid md:row-span-2 md:gap-6": layout === "col" && size === "large",
-        "md:grid md:col-span-2 md:gap-6": layout === "row" && size === "large",
-      })}
+      className={clsx(
+        "rounded-2xl relative z-0 after:z-10 overflow-hidden after:content-[''] after:absolute after:inset-0 after:outline-2 after:-outline-offset-2 after:rounded-2xl after:outline-primary/20 after:pointer-events-none",
+        {
+          "md:grid md:grid-cols-2 md:gap-6": layout === "row",
+          "md:grid md:row-span-2 md:gap-6": layout === "col" && size === "large",
+          "md:grid md:col-span-2 md:gap-6": layout === "row" && size === "large",
+        }
+      )}
     >
+      <div
+        className="absolute inset-0 -z-10 opacity-5"
+        style={{
+          backgroundImage: `url(${grainImage.src})`,
+        }}
+      ></div>
       <div
         className={clsx("relative w-full overflow-hidden aspect-[2.4/1]", {
           "md:h-full": layout === "row",
@@ -30,7 +41,7 @@ function BlogCard({
           "md:aspect-3/1": layout === "row" && size === "large",
         })}
       >
-        <Image src={img_src} alt={blog.frontmatter.title} fill style={{ objectFit: "cover" }} className="rounded-sm" />
+        <Image src={img_src} alt={blog.frontmatter.title} fill style={{ objectFit: "cover" }} className="rounded-2xl" />
       </div>
       <div className="flex flex-col justify-between">
         <div className="p-2">
@@ -46,7 +57,7 @@ function BlogCard({
         </div>
         <Link
           href={`/blogs/${blog.slug}`}
-          className={clsx("self-end text-primary-foreground bg-primary px-4 py-2 m-2 rounded-md text-xs", {
+          className={clsx("z-20 self-end text-primary-foreground bg-primary px-4 py-2 m-2 rounded-md text-xs", {
             "md:text-sm": size === "large",
           })}
         >

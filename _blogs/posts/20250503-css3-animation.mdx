@@ -1,0 +1,943 @@
+---
+title: "轻松掌握原生CSS3动画"
+publishedAt: "2025-05-03"
+summary: "从transform（变换）到transition（过渡）和 animation（动画）。"
+tags: ["web", "best practices", "CSS", "Animation"]
+image: "/images/blogs/0503_css_animation/css_animation_blog_image-0503.svg"
+---
+
+在 CSS3 中，`transform`、`transition` 和 `animation` 是三个非常重要的动画相关属性，它们各自有不同的用途，但经常配合使用。让我们来详细了解它们：
+
+# 一、Transform（变换）
+
+`transform` 用于对元素进行 2D 或 3D 变换，它本身并不会产生动画效果，只是定义元素的最终状态。
+
+```css
+.box {
+  /* 2D 变换 */
+  transform: translate(100px, 100px); /* 位移 */
+  transform: rotate(45deg); /* 旋转 */
+  transform: scale(1.5); /* 缩放 */
+  transform: skew(20deg); /* 倾斜 */
+
+  /* 3D 变换 */
+  transform: translate3d(100px, 100px, 100px);
+  transform: rotateX(45deg);
+  transform: perspective(1000px);
+}
+```
+
+## Transform 变换的 4 大关键功能：
+
+### 1. translate()
+
+```css
+div {
+  transform: translate(100px, 100px);
+}
+```
+
+效果：该变换将元素在 X 和 Y 方向上移动 100 个像素。
+
+![translate 变换效果](/images/blogs/0503_css_animation/css3_translate_example.svg)
+
+### 2. skew()
+
+```css
+div {
+  transform: skew(20deg);
+}
+```
+
+效果：元素倾斜 20 度。
+
+skew 有三种函数： `skewX`, `skewY` 和 `skew`
+
+```jsx
+.box:nth-child(1) {transform: skewX(15deg);}
+.box:nth-child(2) {transform: skewX(30deg);}
+.box:nth-child(3) {transform: skewX(45deg);}
+.box:nth-child(4) {transform: skewY(15deg);}
+.box:nth-child(5) {transform: skewY(30deg);}
+.box:nth-child(6) {transform: skewY(45deg);}
+.box:nth-child(7) {transform: skew(15deg,10deg);}
+.box:nth-child(8) {transform: skew(30deg,20deg);}
+.box:nth-child(9) {transform: skew(45deg,30deg);}
+```
+
+效果如下：
+
+![translate 变换效果](/images/blogs/0503_css_animation/css3_skew_example.png)
+
+### 3. rotate()
+
+rotate 是唯一一个仅接收一个参数的函数，只需要加上旋转的角度即可。
+
+可以看到，如果我们想要改变字的方向，可以旋转 90 度，或者 270 度。
+
+```jsx
+.box:nth-child(1) {transform: rotate(15deg);}
+.box:nth-child(2) { transform: rotate(90deg);}
+.box:nth-child(3) { transform: rotate(270deg);}
+```
+
+效果如下：
+![translate 变换效果](/images/blogs/0503_css_animation/css3_rotate_example.png)
+
+### 4. scale()
+
+scale 函数用于元素的放大缩小，有三个函数 scaleX, scaleY, 和 scale
+
+```jsx
+.box:nth-child(2) {transform: scaleX(0.7);}
+.box:nth-child(3) {transform: scaleY(0.7);}
+.box:nth-child(4) {transform: scale(0.7);}
+```
+
+效果如下：
+![translate 变换效果](/images/blogs/0503_css_animation/css3_scale_example.png)
+
+### 5. 必须要了解的 Transform Origin
+
+Transform-origin 定义了元素变形的原点或基准点。这是 CSS 变形(Transform)操作中的一个重要属性，它决定了元素在进行旋转、缩放或倾斜等变形时的参考点位置。
+
+- 可以使用关键词：top, bottom, left, right, center
+- 可以使用百分比：0%, 50%, 100%等
+- 可以使用具体的长度值：20px, 5em 等
+
+```jsx
+.box:nth-child(2) {
+  transform: rotate(45deg);
+}
+
+.box:nth-child(3) {
+  transform-origin: 50% 50%;
+  transform: rotate(45deg);
+}
+
+.box:nth-child(4) {
+  transform-origin: left top;
+  transform: rotate(10deg);
+}
+```
+
+效果如下，红点为元素变形的原点或基准点（第一个正方形添加 transform，红点仅为位置参考点）
+
+可以看到：默认情况下，**transform-origin 的值是元素的中心点(50% 50%或 center center)，但您可以通过设置不同的值来改变这个参考点。**
+
+![translate 变换效果](/images/blogs/0503_css_animation/css3_tranform-origin_example.png)
+
+### 6. 合并 transforms
+
+我们可以把前面学到的所有指令，全部放到 transform 后面，并用空格间隔，如下面所示：
+
+```css
+div {
+  height: 100px;
+  width: 100px;
+  transform: translate(80px, 80px) scale(1.5, 1.5) rotate(45deg);
+}
+```
+
+你可以想象出上面的 CSS 变形效果吗？
+
+如下图所示， 视觉效果就好像 div 元素向左下方平移了 80px，然后放大了 150%，最后旋转了 45°。
+
+![translate 变换效果](/images/blogs/0503_css_animation/compound_transform.svg)
+
+# 二、Transition（过渡）
+
+## 1. Transition 的 4 大基本属性
+
+Transition 是 CSS 提供的一种机制，用于在元素的不同状态（如悬停、点击、聚焦等）之间创建平滑的属性值变化过程。它定义了属性如何随时间从一个值过渡到另一个值，使网页上的视觉变化更加自然流畅。
+
+例如，让我们来看下面的典型例子，当我们把鼠标移到 a 标签后，a 标签会马上会从底色为黄色的黑体字，变为底色蓝色的白体字。
+
+```css
+a {
+  background-color: yellow;
+  color: black;
+}
+
+a:hover {
+  background-color: blue;
+  color: white;
+}
+```
+
+<div className="transition-demo">
+  <a className="button1" href="#">
+    Hover me
+  </a>
+</div>
+
+<style>
+  {`
+.transition-demo {
+  margin: 20px 0;
+}
+
+.button1 {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: yellow;
+  color: black;
+  text-decoration: none;
+}
+
+.button1:hover {
+  background-color: blue;
+  color: white;
+}
+`}
+</style>
+
+这里我们就可以把 a 标签平时的样子理解为"起始态"，而鼠标悬停的样子理解为"目标态"。
+
+这两个状态之间就存在一个转化 transtion，只不过当前的过渡效果很生硬，这时通过设置 transtion 中属性就可以改变这个过渡，让变化更加平滑。
+
+在 CSS3 中，控制过渡效果， 通常需要设置 transition 的四个基本属性：
+
+- transition-property：指定要过渡的 CSS 属性名称（如 width、color、transform 等）。可以使用"all"来过渡所有发生变化的属性。
+- transition-duration：指定过渡效果持续的时间（如 0.5s 或 500ms）。
+- transition-timing-function：指定过渡效果的速度曲线（如 ease、linear、ease-in、ease-out、cubic-bezier 等）。
+- transition-delay：指定过渡效果开始前的延迟时间（如 0.2s 或 200ms）。
+
+我们可以在之前的代码中加入下面 transition 的控制，来实现一个平滑的状态变化。
+
+```css
+a {
+  background-color: yellow;
+  color: black;
+  transition-property: background-color, color; //定义背景和字色发生过渡
+  transition-duration: 1s; //定义过渡时间为1秒
+  transition-timing-function: ease; //定义过渡的行为，后面展开讲
+  transition-delay: 0.5s; //定义过渡动作的延迟开始时间，可选
+}
+
+a:hover {
+  background-color: blue;
+  color: white;
+}
+```
+
+<div className="transition-demo">
+  <a className="button" href="#">
+    Hover me
+  </a>
+</div>
+
+<style>
+  {`
+.transition-demo {
+  margin: 20px 0;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: yellow;
+  color: black;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: background-color 1s ease 0.5s, color 1s ease 0.5s;
+}
+
+.button:hover {
+  background-color: blue;
+  color: white;
+}
+`}
+</style>
+
+此外上面的四行代码可以用一行 transition 简写：
+
+`transition: <property> <duration> <timing-function> <delay>`
+
+需要注意的是当 property 有多个时，需要为每个 property 设置单独的过渡时间，过渡行为和过渡延迟，中间用"，"间隔开。
+
+```css
+a {
+  background-color: yellow;
+  color: black;
+  transition: background-color 1s ease 0.5s, color 1s ease 0.5s;
+}
+
+a:hover {
+  background-color: blue;
+  color: white;
+}
+```
+
+### ‼️ 注意事项
+
+✅ 需要注意的是：我们需要把 transition 定义在初始态 a 中，而不是目标态 a:hover 中。
+
+❌ 错误/无效做法（只写在目标态）：
+
+```css
+a {
+  background-color: yellow;
+  color: black;
+}
+
+a:hover {
+  background-color: blue;
+  color: white;
+  transition: background-color 1s ease, color 1s ease; /* 写在目标态中，无法达到预期效果 */
+}
+```
+
+因为 CSS 动画是从当前状态过渡到目标状态的，浏览器需要在元素状态变化前就知道哪些属性要过渡、怎么过渡。所以你必须在状态改变之前（也就是初始状态）声明 transition。
+
+### ✅ 起始态和目标态都加 transition 也是 OK 的
+
+在这里也有另外一种写法，就是不管是在起始态，还是目标态，都加上 transition，并且会产生不一样的效果，悬停下面的示例，看看是否和你的预期一致？
+
+```css
+a {
+  background-color: yellow;
+  color: black;
+  transition: 5s;
+}
+
+a:hover {
+  background-color: blue;
+  color: white;
+  transition: 1s;
+}
+```
+
+<div className="transition-demo2">
+  <a className="button" href="#">
+    Hover me
+  </a>
+</div>
+
+<style>
+  {`
+.transition-demo2 {
+  margin: 20px 0;
+}
+
+.button {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: yellow;
+  color: black;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: 5s
+}
+
+.button:hover {
+  background-color: blue;
+  color: white;
+  transition: 1s;
+}
+`}
+</style>
+
+## 2. 控制过渡-贝塞尔函数
+
+在 Transition 中存在一个`transition-timing-function`的属性，可以取值为：
+
+- ease
+- linear
+- ease-in
+- ease-out
+- ease-in-out
+- cubic-bezier(x,y,x,y)
+
+通过将`transition-timing-function`设置为不同的值，就可以获得不同的过渡效果或行为。
+
+建议首先要理解 cubic-bezier 曲线， [点击链接](https://cubic-bezier.com/)进一步了解：
+
+cubic-bezier(x1, y1, x2, y2) 是一个定义 三次贝塞尔曲线（cubic Bézier curve）的函数，用来描述从动画开始到结束过程中速度如何变化。
+
+- x1, x2：必须在 [0, 1] 范围内，表示时间轴上的控制点。
+
+- y1, y2：可以大于 1 或小于 0，表示动画进度值的变化。
+
+贝塞尔曲线的起点是 (0,0)，终点是 (1,1)，中间通过两个控制点 (x1, y1) 和 (x2, y2) 控制曲线形状。
+
+![css3_cubic-bezier](/images/blogs/0503_css_animation/css3_cubic-bezier_function.png)
+
+在 transition 中预定义的 5 个值： ease，linear, ease-in, ease-out, ease-in-out 实际上是这个函数的特殊取值，分别代表了不同的过渡效果。
+
+| 缓动函数名    | 等价 cubic-bezier 值               | 说明                         |
+| ------------- | ---------------------------------- | ---------------------------- |
+| `linear`      | `cubic-bezier(0, 0, 1, 1)`         | 匀速动画                     |
+| `ease`        | `cubic-bezier(0.25, 0.1, 0.25, 1)` | 默认的缓动函数，先慢后快再慢 |
+| `ease-in`     | `cubic-bezier(0.42, 0, 1, 1)`      | 加速进入动画                 |
+| `ease-out`    | `cubic-bezier(0, 0, 0.58, 1)`      | 减速退出动画                 |
+| `ease-in-out` | `cubic-bezier(0.42, 0, 0.58, 1)`   | 先慢 → 加速 → 再慢           |
+
+![css3_cubic-bezier](/images/blogs/0503_css_animation/css3_cubic-bezier.png)
+
+几种不同 timing-function 的对比：
+
+<div className="bezier-demo">
+  <div className="box-wrapper">
+    <div className="box linear" />
+    <div className="label">linear</div>
+  </div>
+  <div className="box-wrapper">
+    <div className="box ease" />
+    <div className="label">ease</div>
+  </div>
+  <div className="box-wrapper">
+    <div className="box ease-in" />
+    <div className="label">ease-in</div>
+  </div>
+  <div className="box-wrapper">
+    <div className="box ease-out" />
+    <div className="label">ease-out</div>
+  </div>
+  <div className="box-wrapper">
+    <div className="box ease-in-out" />
+    <div className="label">ease-in-out</div>
+  </div>
+
+{" "}
+
+<style>
+  {`
+    .bezier-demo {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .box-wrapper {
+      width: 300px;
+      text-align: center;
+    }
+
+    .box {
+      width: 60px;
+      height: 60px;
+      background-color: #4A90E2;
+      transition: transform 1.5s;
+    }
+
+    .label {
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .linear      { transition-timing-function: linear; }
+    .ease        { transition-timing-function: ease; }
+    .ease-in     { transition-timing-function: ease-in; }
+    .ease-out    { transition-timing-function: ease-out; }
+    .ease-in-out { transition-timing-function: ease-in-out; }
+
+    .bezier-demo:hover .box {
+      transform: translateX(300px);
+    }
+    `}
+</style>
+
+</div>
+
+❇️ 如果上面的几种预定参数无法满足要求，可以使用 cubic-bezier 自定义过渡 transition 行为
+
+```css
+transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+```
+
+## 2. 控制过渡-step()函数
+
+🧠 steps() 是什么？
+
+steps(n, direction) 是 CSS 中的一种 离散动画函数，用于将动画拆分为 若干"跳跃式"阶段，而不是连续平滑地过渡。它常用于：
+
+- 逐帧动画（如帧图播放）
+- 文字逐字显示
+- 步进式移动或闪烁动画
+
+如：
+
+```css
+transition-timing-function: steps(5, start);
+```
+
+这里的参数：
+
+- n 表示总共 分成 几 步
+- start 表示每一步的切换发生在每个时间段的开始
+- end（默认值）表示每一步的切换发生在时间段的结束
+
+<div className="stepbox">
+  <div className="step-demo">
+  step box(start)
+  </div>
+  <div className="step-demo">
+  step box(end)
+  </div>
+
+<style>
+  {`
+    .stepbox{
+      width:400px;
+      border:2px grey solid;
+      padding:10px;
+      border-radius:5px;
+      
+    }
+    .step-demo:nth-child(1) {
+      width: 100px;
+      height:100px;
+      margin:0;
+      padding:0;
+      background:skyblue;
+      transition: 1s steps(5,start);
+      text-align:center;
+      color:black;
+      border-radius:10px;
+    }
+
+    .step-demo:nth-child(2) {
+      width: 100px;
+      height:100px;
+      margin:0;
+      padding:0;
+      background:skyblue;
+      transition: 1s steps(5,end);
+      text-align:center;
+      color:black;
+      border-radius:10px;
+    }
+
+    .stepbox:hover .step-demo{
+      transform: translate(280px, 0);
+    }
+    `}
+</style>
+
+</div>
+
+再看一个例子，把鼠标 hover 在图像上触发。
+
+<div className="person">
+<div className="personwalking"></div>
+
+<style>
+  {`
+    .personwalking{
+        width: 125px;
+        height: 150px;
+        background: url(/images/blogs/0503_css_animation/sprite.jpg) left;
+        transition: 2s steps(16);
+    }
+
+    .personwalking:hover {
+      background-position: -4000px 0;
+    }
+  `}
+</style>
+
+</div>
+
+本质上是把一张具有 16 帧的图片，在 2s 中内按照 16 步进行过渡。
+
+![图片](/images/blogs/0503_css_animation/sprite.jpg)
+
+```css
+div {
+  width: 125px;
+  height: 150px;
+  background: url(images/sprite.jpg) left;
+  margin: 100px auto 0;
+  transition: 2s steps(16);
+}
+
+div:hover {
+  background-position: -4000px 0;
+}
+```
+
+# 三、2D 动态效果
+
+好的，截至目前为止，让我们先告别理论，进入一些真实场景的应用。
+
+## 1.使用 transition 实现相册开合效果
+
+请把鼠标移到球形相框上，并思考这个效果是基于什么实现的？
+
+<div>
+    <div className="photo">
+      <p id="tree">Trees</p>
+    </div>
+    <style>
+     {`
+        .photo {
+          width: 295px;
+          height: 295px;
+          border-radius: 50%;
+          text-align: center;
+          border: 5px solid #ccc;
+          background: url(/images/blogs/0503_css_animation/cover-left.png) -2px -1px no-repeat, 
+                      url(/images/blogs/0503_css_animation/cover-right.png) right no-repeat,
+                      url(/images/blogs/0503_css_animation/trees.jpg) 0 0 / cover;
+          margin: 10px auto;
+          box-shadow: 0 0 30px rgba(0, 0, 0, 0.2), 0 0 150px rgba(0, 0, 0, 0.1);
+          transition: 1s;
+      }
+
+      #tree {
+        margin-top: 115px;
+        font: bold 0em Arial;
+        padding: 5px 0;
+        color: #333;
+        transition: 1s;
+      }
+
+      .photo:hover {
+        background-position: -295px -100px, 295px 100px, 0 0;
+      }
+
+      .photo:hover #tree {
+        font-size: 2rem;
+        background: rgba(250, 250, 250, 0.5);
+        transition: 1s 0.2s cubic-bezier(0.2, 0.4, 0.4, 2);
+      }
+     `}
+     </style>
+
+</div>
+
+#### 关键实现：
+
+这里巧妙的使用了 background 属性，在 div 的 CSS 样式中，设置了 3 张背景图片，
+
+通过 hover 事件，触发图片位置的改变，结合 transtion 设置时间，达到平滑过渡的效果。
+
+```html
+html:
+<div>
+  <p>Trees</p>
+</div>
+```
+
+```css
+//起始态
+div {
+  background: url(cover-left.png) 0 0 no-repeat, //左上定位
+    url(cover-right.png) right no-repeat,
+    //靠右定位
+    url(trees.jpg) 0 0 / cover;
+
+  transition: 1s;
+}
+
+p {
+  font: bold 0em Arial; //大小为0
+
+  transition: 1s;
+}
+
+//目标态
+div:hover {
+  background-position: -295px -100px, 295px 100px, 0 0;
+}
+
+div:hover p {
+  font-size: 2rem;
+  background: rgba(250, 250, 250, 0.5);
+}
+```
+
+## 2.将 Transform 和 Transition 结合
+
+下面是一个把 transform scale 和 transition 过渡结合的例子。
+
+把鼠标移到图片上，会发生图片被激活并放大的过程。
+
+<div className="gallery">
+  <ul className="gal">
+			<li className="picture">
+				<img src="/images/blogs/0503_css_animation/1.jpg" alt="Landscape"/>
+			</li>
+			<li className="picture">
+				<img src="/images/blogs/0503_css_animation/2.jpg" alt="Landscape"/>
+		    </li>
+			<li className="picture">
+				<img src="/images/blogs/0503_css_animation/3.jpg" alt="Landscape"/>
+		    </li>
+			<li className="picture">
+				<img src="/images/blogs/0503_css_animation/4.jpg" alt="Landscape"/>
+		    </li>
+			<li className="picture">
+				<img src="/images/blogs/0503_css_animation/5.jpg" alt="Landscape"/>
+		    </li>
+			<li className="picture">
+				<img src="/images/blogs/0503_css_animation/6.jpg" alt="Landscape"/>
+		    </li>
+	</ul>
+<style>
+  {`
+        .gallery{
+          width: 620px;
+		      min-width: 400px;
+		      margin: 100px auto;
+        }
+
+        .gal{
+          display:grid;
+          grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+          gap:20px;
+        }
+
+        .picture:hover{
+          z-index: 10;
+          filter:sepia(0);
+        }
+
+
+        .picture>img{
+          filter: sepia(0.8);
+          border: 8px solid white;
+          border-bottom-width: 30px;
+          box-sizing: border-box;
+          transition: 1s;
+        }
+
+        .picture:nth-child(1) img{
+          transform: translate(-10px, 20px) rotate(-10deg);
+        }
+
+        .picture:nth-child(2) img{
+          -webkit-transform: translate(-20px, 70px) rotate(10deg);
+        }
+
+        .picture:nth-child(3) img{
+          -webkit-transform: translate(-40px, 5px) rotate(13deg);
+        }
+
+        .picture:nth-child(4) img{
+          -webkit-transform: translate(-20px, 20px) rotate(5deg);
+        }
+
+        .picture:nth-child(5) img{
+          -webkit-transform: translate(-30px, 50px) rotate(-10deg);
+        }
+
+        .picture:nth-child(6) img{
+         -webkit-transform: translate(-40px) rotate(5deg);
+        }
+
+        .picture>img:hover{
+          filter:sepia(0);
+          box-shadow: 0 0 5px rgba(0, 0, 0, .5), 0 0 15px rgba(0, 0, 0, .7);
+    			transform: scale(1.5);
+        }
+
+     `}
+
+</style>
+</div>
+
+#### 关键实现：
+
+- html 结构：无序列表 ul，共 6 个 li 标签，每个 li 标签有一个 img
+
+```html
+<div>
+  <ul>
+    <li><img src="1.png" /></li>
+    <li><img src="2.png" /></li>
+    <li><img src="3.png" /></li>
+    <li><img src="4.png" /></li>
+    <li><img src="5.png" /></li>
+    <li><img src="6.png" /></li>
+  </ul>
+</div>
+```
+
+- 图片静态排布时，使用了 transform 的 translate 位移 和 rotate 旋转函数。
+
+```css
+li:nth-child(1) img {
+  -webkit-transform: translate(-10px, 20px) rotate(-10deg);
+}
+...
+```
+
+- 给每个图片的起始态定义 transition:
+
+```css
+li > img {
+  filter: sepia(0.8); //老照片效果
+  border: 8px solid white;
+  border-bottom-width: 30px;
+  box-sizing: border-box;
+  transition: 1s;
+}
+```
+
+- 给每个照片定义目标态 hover 效果：
+
+```css
+li:hover {
+  filter: sepia(0);
+  z-index: 1;
+}
+
+li > img:hover {
+  filter: sepia(0);
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 0, 0, 0.7);
+  transform: scale(1.5);
+}
+```
+
+# 四、3D 动态效果
+
+在实现 3D 的动态效果之前，如同前两张一样，我们需要学习如何实现 3D 的 Transform,也就是说，如何让图片静态看起来就是 3D 的模样，然后再加上 transition 效果。
+
+## 1. 认识 3D Transform
+
+/_ 3D 变换的主要属性 _/
+transform: rotateX(45deg);
+transform: perspective(1000px);
+transform: translate3d(100px, 100px, 100px);
+
+# 五、Animation 动画
+
+CSS 动画可以理解为更加强大的过渡：比过渡提供了更多的控制和灵活性。它可以定义多个关键帧参数 keyframes，每个关键帧代表特定时间的特定动画状态。动画还可以循环、交替，并具有更复杂的计时功能。
+
+## 1. CSS 动画的主要特点包括以下几个方面：
+
+- 多重关键帧 Multiple keyframes：动画可以拥有多个关键帧，从而实现更加复杂和精细的动画效果。
+- 更高的控制度 Greater control：动画允许用户在动画的整个过程中，更精准地控制元素的中间状态。
+- 循环与交替 Looping and alternating：动画可以无限次循环播放，也可以在正向和反向播放之间交替进行。
+- 独立于状态变化 Independent of state changes：动画能够独立于状态变化而运行，并且可以通过 JavaScript 编程方式触发。
+
+## 2. CSS 动画在以下几种情况尤为适用：
+
+- 创建加载旋转器或进度条，为用户提供视觉上的反馈，展示加载过程。
+- 沿路径或轨迹动态地移动元素，实现更加丰富的视觉效果。
+- 执行多阶段动画，通过不同步骤来展示复杂的动态过程。
+- 制作独立的动画，即使没有用户交互也能自行运行，为页面增添活力。
+
+## 3. 如何定义 CSS 动画
+
+1.  使用 `@keyframes` 定义动画关键帧：
+
+        ```css
+        @keyframes 动画名称 {
+          0% {
+            /* 动画开始时的样式 */
+            transform: translateX(0);
+          }
+          50% {
+            /* 动画中间状态的样式 */
+            transform: translateX(100px);
+          }
+          100% {
+            /* 动画结束时的样式 */
+            transform: translateX(0);
+          }
+        }
+        ```
+
+2.  在目标元素上应用动画：
+
+        ```css
+        .目标元素 {
+          animation: 动画名称 持续时间 时间函数 延迟时间 重复次数 方向 填充模式;
+        }
+        ```
+
+    例如：
+
+        ```css
+        .box {
+          animation: bounce 2s ease-in-out 0.5s infinite alternate;
+        }
+        ```
+
+3.  动画属性详解：
+
+- `animation-name`: 指定要使用的关键帧动画名称
+- `animation-duration`: 动画持续时间
+- `animation-timing-function`: 动画时间函数
+- `animation-delay`: 动画延迟时间
+- `animation-iteration-count`: 动画重复次数
+- `animation-direction`: 动画方向
+- `animation-fill-mode`: 动画填充模式
+- `animation-play-state`: 动画播放状态
+
+## 三者的关系
+
+1. **Transform** 是"做什么"：
+
+   - 定义元素的变换方式
+   - 不产生动画效果
+   - 可以组合多个变换
+
+2. **Transition** 是"怎么做"：
+
+   - 定义状态变化的过渡方式
+   - 需要触发条件（如 hover）
+   - 适合简单的状态变化
+
+3. **Animation** 是"完整过程"：
+   - 定义完整的动画序列
+   - 可以自动播放
+   - 适合复杂的动画效果
+
+## 使用建议
+
+1. 简单状态变化用 `transition`：
+
+```css
+.button {
+  transition: all 0.3s ease;
+}
+.button:hover {
+  transform: scale(1.1);
+}
+```
+
+2. 复杂动画用 `animation`：
+
+```css
+@keyframes slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+.slide-in {
+  animation: slide 0.5s ease-out;
+}
+```
+
+3. 组合使用：
+
+```css
+.element {
+  transform: rotate(45deg);
+  transition: transform 0.3s ease;
+  animation: pulse 2s infinite;
+}
+```
+
+## 性能考虑
+
+1. 优先使用 `transform` 和 `opacity` 进行动画，因为这两个属性不会触发重排
+2. 避免同时使用多个可能触发重排的属性
+3. 使用 `will-change` 提示浏览器优化性能
+4. 考虑使用 `transform3d` 或 `translateZ(0)` 开启硬件加速
+
+## 总结
+
+- `transform`: 定义变换方式
+- `transition`: 定义过渡效果
+- `animation`: 定义完整动画
+
+这三个属性共同构成了 CSS3 强大的动画系统，合理使用它们可以创建出流畅、高效的动画效果。

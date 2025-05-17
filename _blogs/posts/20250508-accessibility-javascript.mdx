@@ -1,0 +1,318 @@
+---
+title: "使用Javascript时需要注意的无障碍要求与最佳实践"
+publishedAt: "2025-05-08"
+summary: "为页面添加Javascript等动态相应时，需要考虑哪些无障碍要求，这不是可选，而是必须"
+image: "/images/blogs/accessibility-javascript-20250508.png"
+tags: ["Accessibility", "best practices", "javascript", "Components"]
+---
+
+## JavaScript 中的无障碍 checklist
+
+在使用 JavaScript 时，有几个重要的无障碍最佳实践需要遵循：
+
+### 1. 触发事件（Triggering Events）
+
+- 用户（包括使用屏幕阅读器、有精细运动技能障碍或没有鼠标/触控板的用户）依赖键盘支持与 Web 内容互动。务必为 JavaScript 操作添加键盘支持。
+
+- 如果在像 `<button>` 或 `<a>` 等语义 HTML 元素上使用 `onClick()` 事件，它们会自然地包含鼠标和键盘功能。
+
+- 但如果将 onClick() 事件添加到非语义元素（例如通用的 `<div>`），系统不会自动应用键盘功能。正确做法是使用 `<button onclick="doAction()">Click me!</button>` 这样的语义元素。同时如果使用非语义元素作为 Trigger，必须添加 `keydown/keyup` 事件来检测 Enter 键或空格键的按下操作。人们常常会忘记这一点，导致组件只能通过鼠标访问。
+
+#### ✅ 示例 1：使用 `<div>` 实现普通按钮
+
+```jsx
+import React from "react";
+
+function AccessibleDivButton() {
+  const handleClick = () => {
+    alert("Div button clicked!");
+  };
+
+  return (
+    <div
+      role="button" //需要额外添加
+      tabIndex={0} //需要额外添加
+      onClick={handleClick}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleClick();
+        }
+      }}
+      style={{ cursor: "pointer", padding: "8px", border: "1px solid #ccc" }}
+    >
+      Click Me
+    </div>
+  );
+}
+
+export default AccessibleDivButton;
+```
+
+- 使用 `role="button"` 将 `<div>` 元素标识为按钮
+- tabIndex={0} 让它可以通过键盘 Tab 键聚焦
+- 文本内容作为按钮的可访问名称
+
+#### ✅ 示例 2：使用 `<a>` 实现可切换状态的按钮（toggle button）
+
+```jsx
+import React, { useState } from "react";
+
+function ToggleButton() {
+  const [pressed, setPressed] = useState(false);
+
+  const toggle = () => setPressed((prev) => !prev);
+
+  return (
+    <a
+      role="button" //需要额外添加
+      tabIndex={0} //需要额外添加
+      aria-pressed={pressed} //需要额外添加，向用户表示button当前是否时按下状态
+      onClick={toggle}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          toggle();
+        }
+      }}
+      style={{
+        cursor: "pointer",
+        padding: "8px",
+        display: "inline-block",
+        border: "1px solid #ccc",
+        backgroundColor: pressed ? "#007BFF" : "#f0f0f0",
+        color: pressed ? "#fff" : "#000",
+      }}
+    >
+      {pressed ? "Pressed" : "Not Pressed"}
+    </a>
+  );
+}
+
+export default ToggleButton;
+```
+
+- 使用 role 明确声明按钮角色
+- 使用 tabIndex 让其可聚焦
+- 使用 aria-pressed 管理 toggle 状态（仅限 toggle 示例）
+- 支持 Enter 和 Space 键操作
+
+### 2.网页标题（Page Titles）
+
+网页标题对屏幕阅读器用户至关重要，它告知用户当前所在的页面以及是否已转到新页面。
+
+- 在使用 JavaScript 框架构建单页应用 (SPA) 时尤其要注意网页标题的处理， 由于页面转换或路由不涉及重新加载页面，默认情况下标题不会更改。对于 SPA，可以在页面转换时手动或使用帮助程序包添加 document.title 值。
+
+- 向屏幕阅读器用户播报更新后的网页标题可能需要额外工作，但可以使用动态内容等选项。
+
+#### ✅ 单页应用（SPA）中的动态标题更新
+
+在 SPA 中，页面内容通过 JavaScript 动态加载，标题需要手动更新。以下是一个使用 vanilla JavaScript 的示例。
+
+```html
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <title>我的单页应用</title>
+  </head>
+  <body>
+    <nav>
+      <button onclick="navigateTo('home')">首页</button>
+      <button onclick="navigateTo('about')">关于我们</button>
+      <button onclick="navigateTo('contact')">联系我们</button>
+    </nav>
+    <main id="content"></main>
+
+    <script>
+      function navigateTo(page) {
+        // 更新页面内容
+        const content = document.getElementById("content");
+        content.innerHTML = `<h1>${page.charAt(0).toUpperCase() + page.slice(1)}</h1>`;
+
+        // 动态更新网页标题
+        let pageTitle;
+        switch (page) {
+          case "home":
+            pageTitle = "首页 - 我的单页应用";
+            break;
+          case "about":
+            pageTitle = "关于我们 - 我的单页应用";
+            break;
+          case "contact":
+            pageTitle = "联系我们 - 我的单页应用";
+            break;
+          default:
+            pageTitle = "我的单页应用";
+        }
+        document.title = pageTitle; //使用 document.title 动态更新标题
+
+        // 通知屏幕阅读器标题已更新（可选）
+        announceTitleChange(pageTitle);
+      }
+
+      // 模拟屏幕阅读器播报标题更新
+      function announceTitleChange(title) {
+        const liveRegion = document.createElement("div");
+        liveRegion.setAttribute("aria-live", "polite"); //添加 aria-live 区域来通知屏幕阅读器标题的变化
+        liveRegion.setAttribute("role", "status");
+        liveRegion.style.position = "absolute";
+        liveRegion.style.left = "-9999px";
+        liveRegion.textContent = `页面标题已更新为：${title}`;
+        document.body.appendChild(liveRegion);
+
+        // 清理无障碍区域
+        setTimeout(() => liveRegion.remove(), 1000);
+      }
+    </script>
+  </body>
+</html>
+```
+
+说明：
+
+- 使用 document.title 动态更新标题，确保与当前页面内容一致。
+- 添加 aria-live 区域来通知屏幕阅读器标题的变化，增强无障碍体验。
+- 标题格式保持一致（如“页面名称 - 网站名称”），便于用户理解页面层级。
+
+#### ✅ 使用 React Router 在 React SPA 中更新标题
+
+在 React 应用中，可以结合 React Router 和 useEffect 钩子更新标题。
+
+```jsx
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { useEffect } from "react";
+
+// 页面组件
+const Home = () => <h1>首页</h1>;
+const About = () => <h1>关于我们</h1>;
+const Contact = () => <h1>联系我们</h1>;
+
+// 动态标题组件
+const DynamicTitle = () => {
+  const location = useLocation();
+
+  useEffect(() => {
+    const pageTitles = {
+      "/": "首页 - 我的 React 应用",
+      "/about": "关于我们 - 我的 React 应用",
+      "/contact": "联系我们 - 我的 React 应用",
+    };
+    document.title = pageTitles[location.pathname] || "我的 React 应用";
+
+    // 可选：通知屏幕阅读器
+    const liveRegion = document.createElement("div");
+    liveRegion.setAttribute("aria-live", "polite");
+    liveRegion.textContent = `页面标题已更新为：${document.title}`;
+    document.body.appendChild(liveRegion);
+    setTimeout(() => liveRegion.remove(), 1000);
+  }, [location]);
+
+  return null;
+};
+
+// 主应用
+const App = () => (
+  <Router>
+    <DynamicTitle />
+    <nav>
+      <a href="/">首页</a> | <a href="/about">关于我们</a> | <a href="/contact">联系我们</a>
+    </nav>
+    <Routes>
+      <Route path="/" element={<Home />} />
+      <Route path="/about" element={<About />} />
+      <Route path="/contact" element={<Contact />} />
+    </Routes>
+  </Router>
+);
+
+export default App;
+```
+
+### 3.动态内容（Dynamic Content)
+
+JavaScript 强大的功能之一是能够向网页上的任何元素动态添加 HTML 和 CSS。然而，这种功能也被滥用，创建了许多无法访问的内容。
+
+- 下面是几点在处理动态内容时需要考虑的：
+
+  1. 通过使用语义化的 HTML 元素（如 `<ul>、<li>、<h3>、<p>`）和分离的 CSS 样式，动态添加的内容更加清晰、易于维护，并且对可访问性更友好。相比之下，非语义的 `<div> `堆砌和内联样式会增加复杂性并降低可访问性
+
+  2. 如果您需要使用 JavaScript 向网页动态添加内容，请确保内容简单明了，并且易于访问。比如通过添加 / 删除 .hidden 类来控制内容显示，而不是用 JS 设置 display: none。
+
+  3. 切换 CSS 类，而不是添加内嵌样式，推荐通过切换类名的方式控制样式（例如显示 / 隐藏），不要直接用 JavaScript 改变元素的 style 属性。
+
+  4. 动态添加内容（如弹窗、警告、通知等）时，要考虑屏幕阅读器是否能访问，包括使用：
+
+     - `aria-live` 区域
+     - 合理的焦点管理
+     - 结构清晰的 HTML
+
+示例:动态添加可访问的弹窗
+
+代码说明:
+
+1. aria-live 区域：
+   - CartNotification 组件使用 `<div role="alert" aria-live="polite">` 确保添加商品后的通知（如“Laptop successfully added to cart!”）被屏幕阅读器朗读。
+   - role="alert" 表明这是一个重要通知，aria-live="polite" 适合非紧急反馈。
+2. 焦点管理：
+   - 通知出现时，useEffect 将焦点移动到通知区域（notificationRef），通过 tabIndex="-1" 使容器可聚焦。
+   - 通知关闭后（手动点击“Dismiss”或 3 秒自动关闭），焦点返回到触发按钮（addButtonRef）。
+   - 仅为第一个“Add to Cart”按钮设置 ref（可扩展为动态 ref 管理）。
+
+```jsx
+// 通知组件
+const CartNotification = ({ isVisible, message, onClose }) => {
+  const notificationRef = useRef(null);
+
+  // 自动关闭通知（3秒后）
+  useEffect(() => {
+    if (isVisible) {
+      const timer = setTimeout(() => {
+        onClose();
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isVisible, onClose]);
+
+  // 焦点管理：通知出现时聚焦到通知区域
+  useEffect(() => {
+    if (isVisible && notificationRef.current) {
+      notificationRef.current.focus();
+    }
+  }, [isVisible]);
+
+  if (!isVisible) return null;
+
+  return (
+    <div role="alert" aria-live="polite" className="cart-notification" ref={notificationRef} tabIndex="-1">
+      <p>{message}</p>
+      <button onClick={onClose}>Dismiss</button>
+    </div>
+  );
+};
+```
+
+### 4. 焦点管理（Focus Management）
+
+焦点管理对于仅使用键盘的用户至关重要，需要了解何时何地应捕获焦点，以及何时不应捕获焦点
+
+- 在组件级别，组件的焦点需要得到妥善管理。例如使用键盘的用户打开模态窗口时，用户应能够在模态窗口的可操作元素之间按 Tab 键切换，但绝不应允许用户在未明确关闭模态窗口的情况下离开模态窗口。具体实现可以参考这篇博客[《一个友好而健壮的模态对话框》](/blogs/20250508-accessibility-modal-dialog)
+
+- 在网页级别，当用户从一个网页导航到另一个网页时（尤其是在 SPA 中），也必须保持焦点。 在页面之间转换时，开发团队必须决定页面加载时焦点会移至何处。实现方法包括：
+
+  - 将焦点放在包含 aria-live 通知的主容器上
+  - 将焦点重新放置在跳转到主要内容的链接上
+  - 或将焦点移至新页面的顶级标题
+
+选择哪种方法取决于您使用的框架以及您要向用户提供的内容。
+
+### 5.总结
+
+用 javascript 的同时，得时刻考虑无障碍。
+
+1. 尽量用语义化的 HTML，如果不得不用类似`<div>`做按钮，则必须补上键盘交互和焦点管理。
+2. 单页 SPA 应用中，单页面跳转时，需要管理好页面 title。
+3. 用 CSS 类来控制，而不是直接通过 javascript 去更改 style。
+4. 借助 aria 来传达组件的动态信息，如用 live regions 去广播新弹出窗口的提示，新加物品的提示等
+
+请记住，无障碍并非时可选，而是高质量开发应该包括的必须部分。

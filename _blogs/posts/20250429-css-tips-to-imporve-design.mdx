@@ -1,0 +1,83 @@
+---
+title: "一些提高设计感的CSS最佳实践"
+publishedAt: "2025-04-29"
+summary: ""
+---
+
+## 一、使用 outline 处理卡片边缘
+
+请仔细观察下面两个卡片的边框，不难看出，左侧的边框比右侧的边框在细节上处理得更好。
+
+为什么？右侧卡片的边框通过对外框 div 添加"border-2"的效果得到，但是边框在图片外，只有在仔细观察时，才能发现这个细节。
+
+而左侧卡片的边框压在图片的最边缘上，产生一个边框与下方图片重叠的效果，从视觉效果上更佳，也更能体现出专业的细节处理。
+
+![](/images/blogs/20250429_outline_vs_border.jpg)
+
+主要实现方法：
+
+```jsx
+<div className="rounded-2xl relative z-0 after:z-10 overflow-hidden after:content-[''] after:absolute after:inset-0 after:outline-2 after:-outline-offset-2 after:rounded-2xl after:outline-primary/50 after:pointer-events-none"></div>
+```
+
+- `ounded-2xl`：容器本身圆角。
+- `relative`：确保伪元素 after 的绝对定位以它为参考。
+- `z-0`：将容器的层级设为 0（为之后的 after 的 z-10 做准备）。
+- `overflow-hidden`：裁切溢出的 after 边框，使其边缘不会超出原组件。
+- `after:content-['']`：创建一个空的伪元素内容。
+- `after:absolute`：绝对定位，填满整个父元素。
+- `after:inset-0`：相当于 top: 0; right: 0; bottom: 0; left: 0。
+- `after:outline-2`：伪元素的轮廓宽度为 2px。
+- `after:-outline-offset-2`：轮廓内缩 2px，产生包裹感（而不是贴边的边框）。
+- `after:outline-primary/50`：使用主色调的半透明色（50% 透明度）作为 outline 颜色。
+- `after:rounded-2xl`：伪元素和主容器拥有相同的圆角，保证边框贴合。
+- `after:z-10`：将 outline 层级设为比父元素高（z-0 < z-10），能清晰地显示。
+- `after:pointer-events-none`：禁用该伪元素的点击事件，防止影响用户交互。
+
+✅ 视觉结果：
+
+这段代码不会真正改变 `<div>` 的内容，而是通过 after 创建一个透明内容的边框层，加上 outline 样式，实现一种柔和的、贴合的描边效果。
+
+## 二、使用字体渐变
+
+有时我们希望给标题，或者醒目的字体加上渐变效果，如下图所示：
+
+![](/images/blogs/20250429_purcolor_vs_gradient.jpg)
+
+实现方法：
+
+```jsx
+<h1 className="text-[clamp(2rem,15vw,15rem)] font-bold uppercase leading-none bg-gradient-to-r from-primary/70 to-primary text-transparent bg-clip-text">
+  The Blog
+</h1>
+```
+
+✨ 实现字体渐变的核心原理：
+
+文字本身不能直接设置渐变色，但可以通过下面两个 CSS 技巧“曲线救国”：
+
+- `background-image: linear-gradient(...)` 给元素背景设置渐变。
+- `text-fill-color: transparent` + `background-clip: text` 把背景“裁剪”到文字形状上，只在文字区域显示背景。
+
+🧱 关键 Tailwind 类说明：
+
+1.  **bg-gradient-to-r from-primary/70 to-primary**
+    这是渐变的“颜色源”。
+
+    - `bg-gradient-to-r`：设置背景渐变方向为从左到右（right）。
+
+    - `from-primary/70`：渐变起始色为主题色，透明度 70%。
+
+    - `to-primary`：渐变结束色为主题色（不透明）。
+
+    💡 这实际上是设置了一个横向的线性渐变背景！
+
+2.  **text-transparent**
+    让文字本身完全透明。
+
+    为什么要这么做？因为我们不是用 color 给文字上色，而是用背景剪裁来让背景显示在文字形状上。
+
+3.  **bg-clip-text**
+    将背景“剪裁”到文字形状上。
+
+    即：背景只在文字区域可见，其他地方隐藏。

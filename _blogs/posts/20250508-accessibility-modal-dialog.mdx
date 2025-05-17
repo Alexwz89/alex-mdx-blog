@@ -1,0 +1,376 @@
+---
+title: "一个友好而健壮的模态对话框"
+publishedAt: "2025-05-08"
+summary: "如何创建一个符合可访问性标准和无障碍的 React 模态窗口？"
+image: "/images/blogs/accessibility-modal-dialog-front-20250508.png"
+tags: ["Accessibility", "best practices", "React", "Components"]
+---
+
+## 一、什么是符合规范的模态窗口
+
+1. 焦点陷阱功能
+
+   - 焦点自动移动：当模态窗口打开时，焦点自动移到关闭按钮上。
+   - 焦点循环：通过监听 Tab 键事件，确保焦点在模态窗口内的可聚焦元素之间循环：
+
+   - 如果用户在最后一个元素上按 Tab，焦点会回到第一个元素
+   - 如果用户在第一个元素上按 Shift+Tab，焦点会移到最后一个元素
+
+   - 无法离开模态窗口：用户无法通过 Tab 键将焦点移出模态窗口，必须明确关闭窗口才能返回主页面
+
+2. 可访问性特性
+
+   - ARIA 属性：使用 role="dialog", aria-modal="true" 等告知屏幕阅读器这是一个模态窗口
+   - ESC 键关闭：用户可以按 ESC 键关闭模态窗口
+   - 恢复焦点：关闭模态窗口后，焦点会自动返回到打开模态窗口的元素
+   - 点击背景关闭：用户可以点击模态窗口外的背景区域关闭窗口
+
+3. 预期使用行为
+
+   通过点击"打开模态窗口"按钮来测试这个组件。一旦打开，你将注意到：
+
+   - 焦点会自动移到关闭(X)按钮
+   - 您可以用 Tab 键在按钮和输入框之间切换
+   - 当您按 Tab 到达最后一个元素时，焦点会回到第一个元素
+   - 无论如何，焦点都不会离开模态窗口
+
+   我们需要执行以下操作之一才能关闭模态窗口：
+
+   - 点击关闭(X)按钮
+   - 点击"取消"按钮
+   - 按 ESC 键
+   - 点击模态窗口外的背景区域
+
+## 二、代码实现
+
+```jsx
+import { useEffect, useRef, useState } from "react";
+import { X } from "lucide-react";
+
+// 主模态组件
+export default function AccessibleModal() {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const openModal = () => setIsOpen(true);
+  const closeModal = () => setIsOpen(false);
+
+  return (
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100 p-4">
+      <h1 className="text-2xl font-bold mb-4">键盘可访问的模态窗口示例</h1>
+      <button
+        onClick={openModal}
+        className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+      >
+        打开模态窗口
+      </button>
+
+      {isOpen && (
+        <Modal onClose={closeModal}>
+          <div className="p-6">
+            <h2 className="text-xl font-semibold mb-4">模态窗口标题</h2>
+            <p className="mb-4">
+              这是一个专注于键盘可访问性的模态窗口。用户可以通过Tab键在元素之间导航，但无法离开模态窗口，除非明确关闭它。
+            </p>
+
+            <div className="flex gap-4 mt-6">
+              <button className="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2">
+                确认
+              </button>
+              <button
+                className="px-4 py-2 bg-gray-300 text-gray-800 rounded hover:bg-gray-400 focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+                onClick={closeModal}
+              >
+                取消
+              </button>
+              <input
+                type="text"
+                placeholder="测试焦点陷阱"
+                className="px-4 py-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+          </div>
+        </Modal>
+      )}
+    </div>
+  );
+}
+
+// 模态窗口组件
+function Modal({ children, onClose }) {
+  // 用于制造焦点陷阱的引用
+  const modalRef = useRef(null);
+  const closeButtonRef = useRef(null);
+
+  useEffect(() => {
+    // 存储触发模态窗口打开的元素，以便关闭后恢复焦点
+    const previousActiveElement = document.activeElement;
+
+    // 当模态窗口打开时，焦点自动移到关闭按钮
+    if (closeButtonRef.current) {
+      closeButtonRef.current.focus();
+    }
+
+    // 捕获按键事件并处理Escape键关闭模态
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    // 防止焦点离开模态窗口的函数
+    const handleFocusTrap = (event) => {
+      // 如果模态窗口存在且用户正在使用Tab键
+      if (modalRef.current && event.key === "Tab") {
+        const focusableElements = modalRef.current.querySelectorAll(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+
+        const firstElement = focusableElements[0];
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        // 如果按下Shift+Tab且当前焦点在第一个元素上，则循环到最后一个元素
+        if (event.shiftKey && document.activeElement === firstElement) {
+          event.preventDefault();
+          lastElement.focus();
+        }
+        // 如果按下Tab且当前焦点在最后一个元素上，则循环到第一个元素
+        else if (!event.shiftKey && document.activeElement === lastElement) {
+          event.preventDefault();
+          firstElement.focus();
+        }
+      }
+    };
+
+    // 添加全局事件监听器
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("keydown", handleFocusTrap);
+
+    // 防止背景滚动
+    document.body.style.overflow = "hidden";
+
+    // 清理函数
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("keydown", handleFocusTrap);
+      document.body.style.overflow = "";
+
+      // 恢复焦点到之前的元素
+      if (previousActiveElement) {
+        previousActiveElement.focus();
+      }
+    };
+  }, [onClose]);
+
+  // 点击背景关闭模态窗口
+  const handleBackdropClick = (event) => {
+    if (event.target === event.currentTarget) {
+      onClose();
+    }
+  };
+
+  return (
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"
+      onClick={handleBackdropClick}
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="modal-title"
+    >
+      <div ref={modalRef} className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 relative" role="document">
+        <button
+          ref={closeButtonRef}
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-1"
+          aria-label="关闭模态窗口"
+        >
+          <X size={24} />
+        </button>
+
+        {children}
+      </div>
+    </div>
+  );
+}
+```
+
+## 三、实现拆解
+
+1.  组件结构
+
+    这个实现由两个主要组件组成：
+
+    - AccessibleModal（外部组件）：
+
+      - 维护了一个对话框 isOpen 的状态。
+      - 定义了打开对话框之前的背景页面和对话框的打开 button
+      - 使用 button 的 onClick 函数来控制 isOpen 的状态
+      - 使用 isOpen 基于条件渲染模块对话框 Modal
+
+    - Modal（核心模态组件）：
+
+      - 接收 children 和 onClose 函数作为 props
+      - 处理所有键盘交互和焦点管理
+      - 实现焦点陷阱功能
+
+    ![代码运行示意图](/images/blogs/accessibility-modal-dialog-20250508.png)
+
+2.  数据流
+
+        1. 用户点击"打开模态窗口"按钮 → 调用openModal() → 设置isOpen为true
+        2. isOpen变为true → 条件渲染Modal组件
+        3. Modal组件挂载 → useEffect执行 → 设置事件监听、移动焦点、阻止背景滚动
+        4. 用户与模态交互 → 焦点陷阱确保焦点在模态内循环
+        5. 用户关闭模态（通过按钮、Esc键或背景点击）→ 调用closeModal() → 设置isOpen为false
+        6. isOpen变为false → Modal组件卸载 → useEffect清理函数执行 → 恢复焦点、移除事件监听
+
+3.  Modal 组件是 Accessibility 的实现关键
+
+    首先是 Modal 组件渲染：
+
+    ```jsx
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50"  //7.设置z层级，以及半透明
+      onClick={handleBackdropClick}  {/* 1. 创建焦点陷阱机制，让Tab焦点在这个对话框内*/}
+      role="dialog" // 4. 正确添加aria属性，声明这是一个对话框
+      aria-modal="true" // 4. 正确添加aria属性，声明这是一个模式窗口
+      aria-labelledby="modal-title" // 4. 正确添加aria属性，关联模态窗口标题
+    >
+      <div ref={modalRef} className="bg-white rounded-lg shadow-xl max-w-md w-full mx-4 relative" role="document">
+        <button
+          ref={closeButtonRef}
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-400 rounded-full p-1"
+          aria-label="关闭模态窗口"
+        >
+          <X size={24} />
+        </button>   //3. 提供关闭按钮（ X 图标）
+
+        {children}
+      </div>
+    </div>
+    ```
+
+    其次是 useEffect 函数，这个函数在窗口渲染完毕，以及 onClose 状态变化时都会被调用
+
+    ```jsx
+    useEffect(() => {
+      // 2. 管理焦点流：存储触发模态窗口打开的元素，以便关闭后恢复焦点
+      const previousActiveElement = document.activeElement;
+
+      // 2. 管理焦点流：当模态窗口打开时，焦点自动移到关闭按钮
+      if (closeButtonRef.current) {
+        closeButtonRef.current.focus();
+      }
+
+      // 3. 提供多种关闭方式： 捕获按键事件并处理Escape键关闭模态
+      const handleKeyDown = (event) => {
+        if (event.key === "Escape") {
+          onClose();
+        }
+      };
+
+      // 1. 焦点陷阱机制： 防止焦点离开模态窗口的函数
+      const handleFocusTrap = (event) => {
+        // 如果模态窗口存在且用户正在使用Tab键
+        if (modalRef.current && event.key === "Tab") {
+          //识别所有的可聚焦元素（按钮，链接，输入框等；
+          const focusableElements = modalRef.current.querySelectorAll(
+            'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+          );
+
+          const firstElement = focusableElements[0];
+          const lastElement = focusableElements[focusableElements.length - 1];
+
+          // 如果按下Shift+Tab且当前焦点在第一个元素上，则循环到最后一个元素
+          if (event.shiftKey && document.activeElement === firstElement) {
+            event.preventDefault();
+            lastElement.focus();
+          }
+          // 如果按下Tab且当前焦点在最后一个元素上，则循环到第一个元素
+          else if (!event.shiftKey && document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+          }
+        }
+      };
+
+      // 添加全局事件监听器
+      document.addEventListener("keydown", handleKeyDown);
+      document.addEventListener("keydown", handleFocusTrap);
+
+      // 5. 处理背景内容-防止背景滚动
+      document.body.style.overflow = "hidden";
+
+      //6. 清理事件监听器- 清理函数
+      return () => {
+        document.removeEventListener("keydown", handleKeyDown);
+        document.removeEventListener("keydown", handleFocusTrap);
+        document.body.style.overflow = "";
+
+        // 5. 处理背景内容- 关闭后，恢复焦点到之前的元素
+        if (previousActiveElement) {
+          previousActiveElement.focus();
+        }
+      };
+    }, [onClose]);
+    ```
+
+    下面总结了实现可访问模态窗口的 7 点必需步骤
+
+          1. 创建焦点陷阱机制
+
+              - 使用 useRef 引用模态窗口容器
+              - 识别所有可聚焦元素（按钮、链接、输入框等）
+              - 实现 Tab 键监听器，确保焦点在模态窗口内循环
+              - 阻止焦点离开模态窗口（在首尾元素处实现循环）
+
+
+          2. 管理焦点流
+
+              - 记录打开模态窗口前的活动元素
+              - 模态窗口打开时自动将焦点移到第一个或主要元素（通常是关闭按钮）
+              - 关闭模态窗口时将焦点返回到之前的元素
+
+
+          3. 提供多种关闭模态窗口的方式
+
+              - 通过关闭按钮（通常是 X 图标）
+              - 通过键盘快捷键（通常是 ESC 键）
+              - 通过点击模态窗口外的背景区域（可选但推荐）
+              - 通过"取消"或"关闭"按钮（根据交互需求）
+
+
+          4. 添加正确的 ARIA 属性
+
+              - role="dialog" 告知辅助技术这是一个对话框
+              - aria-modal="true" 表示这是一个模态窗口
+              - aria-labelledby 关联模态窗口标题
+              - 为关闭按钮添加 aria-label="关闭模态窗口"
+
+
+          5. 处理背景内容
+
+              - 防止背景内容滚动（设置 document.body.style.overflow = 'hidden'）
+              - 在关闭模态窗口时恢复背景内容的正常状态
+
+
+          6. 清理事件监听器
+
+              - 在组件卸载时移除所有事件监听器
+              - 恢复所有临时修改（如背景滚动）
+
+
+          7. 设置适当的样式与层级
+
+              - 使用 z-index 确保模态窗口位于其他内容之上
+              - 使用半透明背景遮罩隔离模态窗口与背景内容
+
+          这些步骤共同确保了模态窗口对键盘用户的可访问性，让他们能够轻松导航模态窗口内的内容，同时防止他们在不经意间离开模态窗口。实现这些步骤后，您的模态窗口将符合 WCAG（Web 内容可访问性指南）的要求。
+
+## 四、为什么这是一个好的组件：
+
+1. 关注点分离：组件已将核心功能（Modal）与使用示例（AccessibleModal）分开
+2. 完整的可访问性功能：包含了焦点陷阱、键盘导航、ARIA 属性等必要的可访问性功能
+3. 灵活的内容渲染：使用 children 属性允许传入任意内容
+4. 关闭机制完善：提供了多种方式关闭（X 按钮、Esc 键、背景点击）
+5. 正确的事件处理和清理：确保不会产生内存泄漏或副作用

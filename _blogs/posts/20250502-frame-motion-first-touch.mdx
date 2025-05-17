@@ -1,0 +1,203 @@
+---
+title: "使用 Framer-Motion"
+publishedAt: "2025-05-02"
+summary: "In the ever-evolving landscape of software development, the debate between dynamic and static typing continues to be a hot topic."
+---
+
+Framer Motion 是一个强大而易用的 React 动画库，它通过声明式 API 让动画变得非常直观。
+
+## 1. 认识 Framer-Motion
+
+### 第一步. 安装 framer-motion：
+
+```bash
+npm install framer-motion
+```
+
+在您的 React 组件中导入并使用：
+
+```jsx
+import { motion } from "framer-motion";
+```
+
+### 第二步，最简单的动画
+
+准备一个 100px \* 100px 的盒子，背景颜色为天蓝。
+
+```jsx
+function Box() {
+  return (
+    <div
+      style={{
+        //内联样式
+        width: 100,
+        height: 100,
+        backgroundColor: "skyblue",
+      }}
+    />
+  );
+}
+```
+
+为了给这个盒子添加上动画，我们需要
+
+1.  把 div 前面加上 motion.
+
+2.  添加 initial（初始状态）、animate（动画目标状态） 和 transition（动画控制）这三个最核心属性
+
+最终就会呈现个 渐入 fade-in 的例子：
+
+```jsx
+import { motion } from "framer-motion";
+function Box() {
+  return (
+    <motion.div
+      initial={{ opacity: 0 }} // 1.添加初始态：透明，关键字initial
+      animate={{ opacity: 1 }} // 2.添加结束态，不透明，关键字animate
+      transition={{ duration: 1 }} // 动画时间为 1 秒
+      style={{
+        //内联样式
+        width: 100,
+        height: 100,
+        backgroundColor: "skyblue",
+      }}
+    />
+  );
+}
+```
+
+这个运行效果为：方块从透明逐渐变为可见。是不是很简单？
+
+### 第三步：添加位置移动动画
+
+在此基础上，我们可以添加 x 或 y 来控制位置，比如我们需要增加一个盒子从左边划入的效果：
+
+```jsx
+<motion.div
+  initial={{ opacity: 0, x: -100 }}
+  animate={{ opacity: 1, x: 0 }}
+  transition={{ duration: 0.8 }}
+  style={{ width: 100, height: 100, backgroundColor: "coral" }}
+/>
+```
+
+效果：元素从左侧（-100px）滑入，并逐渐显现。
+
+### 第四步： 响应交互的效果
+
+Framer Motion 还支持交互状态下的动画，比如鼠标悬停和点击：
+
+```jsx
+<motion.div
+  whileHover={{ scale: 1.2 }} // 鼠标悬停放大
+  whileTap={{ scale: 0.8 }} // 点击时缩小
+  style={{
+    width: 100,
+    height: 100,
+    backgroundColor: "lightgreen",
+    marginTop: 20,
+  }}
+/>
+```
+
+现在你创建的是一个"会呼吸"的按钮了！
+
+### 第五步：引入 Variants —— 动画状态管理
+
+❓ 为什么需要 variants？
+
+如果你有多个动画状态（比如 "隐藏"、"显示"、"离开"），而且多个组件都使用这些状态，直接写 initial、animate 会很繁琐。
+
+下面是使用 Framer Motion 创建动画的示例代码：
+
+```jsx
+const boxVariants = {
+  hidden: { opacity: 0, x: -100 },
+  visible: { opacity: 1, x: 0 },
+};
+
+function MotionBox() {
+  return (
+    <motion.div
+      variants={boxVariants}
+      initial="hidden"
+      animate="visible"
+      transition={{ duration: 2 }}
+      style={{
+        width: 100,
+        height: 100,
+        backgroundColor: "pink",
+      }}
+    />
+  );
+}
+```
+
+实际效果如下：
+
+<MotionBox />
+
+要使用这段代码，您需要：
+
+1. 安装 framer-motion：
+
+```bash
+npm install framer-motion
+```
+
+2. 在您的 React 组件中导入并使用：
+
+```jsx
+import { motion } from "framer-motion";
+```
+
+3. 将组件添加到您的页面中：
+
+```jsx
+<MotionBox />
+```
+
+这样您就能看到一个从左侧滑入的粉色方块动画效果。
+
+### 第六步、退出动画（exit）
+
+配合`<AnimatePresence>`使用，让元素消失时也能有动画：
+
+```jsx
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+
+function FadeExample() {
+  const [show, setShow] = useState(true);
+
+  return (
+    <>
+      <button onClick={() => setShow(!show)}>Toggle</button>
+      <AnimatePresence>
+        {show && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.5 }}
+            style={{ width: 100, height: 100, backgroundColor: "gray", marginTop: 10 }}
+          />
+        )}
+      </AnimatePresence>
+    </>
+  );
+}
+```
+
+总结一下属性用途表：
+
+| 属性         | 类型          | 用途描述                   |
+| ------------ | ------------- | -------------------------- |
+| `initial`    | 对象 / 字符串 | 初始动画状态               |
+| `animate`    | 对象 / 字符串 | 动画目标状态               |
+| `exit`       | 对象          | 元素移除时的动画状态       |
+| `transition` | 对象          | 动画的时长、延迟、缓动函数 |
+| `whileHover` | 对象          | 鼠标悬停时的状态           |
+| `whileTap`   | 对象          | 点击时的状态               |
+| `variants`   | 对象          | 多状态集中管理             |
+| `style`      | 对象          | 元素基本样式（非动画）     |

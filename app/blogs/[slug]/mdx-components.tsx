@@ -1,10 +1,16 @@
 import type { MDXComponents } from "mdx/types";
 import { cn } from "@/lib/utils";
+import MotionBox from "@/components/blog-components/MotionBox";
 
 export const mdxComponents: MDXComponents = {
+  // 自定义组件
+  MotionBox,
+
   // 标题
-  h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4">{children}</h1>,
-  h2: ({ children }) => <h2 className="text-2xl font-bold mt-6 mb-3 border-b pb-2">{children}</h2>,
+  h1: ({ children }) => <h1 className="text-3xl font-bold mt-8 mb-4 border-b-2 border-primary pb-2">{children}</h1>,
+  h2: ({ children }) => (
+    <h2 className="text-2xl font-bold mt-6 mb-3 border-b-[1px] border-gray-400 pb-2">{children}</h2>
+  ),
   h3: ({ children }) => <h3 className="text-xl font-bold mt-5 mb-2">{children}</h3>,
 
   // 段落和列表

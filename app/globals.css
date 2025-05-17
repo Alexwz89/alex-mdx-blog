@@ -122,8 +122,19 @@
   src: url("/fonts/Roboto-VF.ttf") format("truetype");
 }
 
+/* 添加 JetBrains Mono 字体声明 */
+@font-face {
+  font-family: "JetBrains Mono";
+  src: url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono/web/woff2/JetBrainsMono-Regular.woff2") format("woff2"),
+    url("https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono/web/woff/JetBrainsMono-Regular.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
 @theme {
-  --font-primary: "Inter", sans-serif;
+  --font-primary: "Inter", "Microsoft YaHei", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "WenQuanYi Micro Hei",
+    sans-serif;
   --font-secondary: "Roboto", sans-serif;
 }
 
@@ -133,7 +144,35 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-size: 1rem;
+    line-height: 1.75;
+    letter-spacing: 0.0125em;
+    font-family: "Inter", "Microsoft YaHei", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "WenQuanYi Micro Hei",
+      sans-serif;
   }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    @apply font-primary font-medium tracking-tight;
+    line-height: 1.3;
+  }
+
+  p {
+    @apply font-primary;
+    line-height: 1.8;
+    letter-spacing: 0.025em;
+  }
+}
+
+:lang(zh),
+:lang(zh-CN),
+:lang(zh-Hans) {
+  font-family: "Microsoft YaHei", "Noto Sans SC", "PingFang SC", "Hiragino Sans GB", "WenQuanYi Micro Hei", "Inter",
+    sans-serif;
 }
 
 /* Prism 样式 - 明色主题 */
@@ -142,27 +181,32 @@ pre[class*="language-"] {
   color: var(--prism-text);
   padding: 1.5em;
   margin: 1em 0;
-  overflow: auto;
   border-radius: 0.5em;
   border: 1px solid var(--prism-border);
   font-size: 0.9375em;
   line-height: 1.6;
   font-family: "JetBrains Mono", monospace;
+  overflow-x: auto;
 }
 
 code[class*="language-"] {
   font-family: "JetBrains Mono", monospace;
   font-size: 0.9375em;
-  text-align: left;
-  white-space: pre;
-  word-spacing: normal;
-  word-break: normal;
-  word-wrap: normal;
   line-height: 1.6;
   tab-size: 4;
   hyphens: none;
-  letter-spacing: 0;
-  font-feature-settings: "liga" 1, "calt" 1;
+  text-wrap: pretty;
+}
+
+/* 确保代码块内的所有元素都使用等宽字体 */
+.token {
+  font-family: "JetBrains Mono", monospace;
+}
+
+/* 移除可能导致冲突的样式 */
+pre[class*="language-"] *,
+code[class*="language-"] * {
+  font-family: inherit;
 }
 
 /* 明色主题的语法高亮 */

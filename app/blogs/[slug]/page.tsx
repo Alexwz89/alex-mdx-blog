@@ -3,6 +3,7 @@ import BlogLayout from "./blog-layout";
 import { MDXRemote } from "next-mdx-remote/rsc";
 import { mdxComponents } from "./mdx-components";
 import rehypePrismPlus from "rehype-prism-plus";
+import remarkGfm from "remark-gfm";
 
 export default async function Page({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
@@ -16,6 +17,7 @@ export default async function Page({ params }: { params: Promise<{ slug: string 
         options={{
           mdxOptions: {
             rehypePlugins: [[rehypePrismPlus, { ignoreMissing: true }]],
+            remarkPlugins: [remarkGfm],
           },
         }}
       />
